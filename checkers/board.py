@@ -9,7 +9,6 @@ class Board:
         self.red_left = self.white_left = 12
         self.red_kings = self.white_kings = 0
         self.create_board()
-        self.is_jumping = False
         self.can_move = True
 
     def draw_squares(self, win):
@@ -21,7 +20,7 @@ class Board:
     def move(self, piece, row, col):
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         piece.move(row, col)
-        if (row == ROWS - 1 or row == 0) and not self.is_jumping:
+        if row == ROWS - 1 or row == 0:
             piece.make_king()
             if piece.color == WHITE:
                 self.white_kings += 1
@@ -63,7 +62,6 @@ class Board:
                     self.white_left -= 1
 
     def winner(self, turn):
-        # TODO more
         if self.red_left <= 0:
             return WHITE
         elif self.white_left <= 0:
@@ -265,10 +263,6 @@ class Board:
                             longest_local = len(list(moves.values())[0])
                             if longest_local > longest:
                                 longest = longest_local
-        if longest > 0:
-            self.is_jumping = True
-        elif longest == -1:
+        if longest == -1:
             self.can_move = False
-        else:
-            self.is_jumping = False
         return longest
