@@ -61,6 +61,8 @@ class Game:
             # print(st, com, en, end=end)
             self.change_turn()
             self.validate_first()
+            self.validation_second()
+            print()
         else:
             return False
 
@@ -83,4 +85,8 @@ class Game:
 
     def validate_first(self):
         evaluation = self.board.validate_one(self.turn)
+        print(evaluation)
+
+    def validation_second(self):
+        evaluation = self.board.validate_two(self.turn)
         print(evaluation)

@@ -86,10 +86,23 @@ class Board:
                 if piece != 0:
                     is_white = piece.color == WHITE
                     if not piece.king:
-                        evaluation += FIELD_PAWN_VALUES[i] if is_white else -FIELD_PAWN_VALUES[-i - 1]
+                        evaluation += PAWN_VALUES_ONE[i] if is_white else -PAWN_VALUES_ONE[-i - 1]
                     else:
-                        evaluation += FIELD_KING_VALUES[i][j] if is_white else -FIELD_KING_VALUES[-i - 1][-j - 1]
-        return evaluation
+                        evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
+        return round(evaluation, 2)
+
+    def validate_two(self, turn):
+        evaluation = 0.1 if turn == WHITE else -0.1
+
+        for i, row in enumerate(self.board):
+            for j, piece in enumerate(row):
+                if piece != 0:
+                    is_white = piece.color == WHITE
+                    if not piece.king:
+                        evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
+                    else:
+                        evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
+        return round(evaluation, 2)
 
     def get_valid_moves(self, piece, length=None):
         moves = {}
