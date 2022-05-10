@@ -7,6 +7,7 @@ class Game:
     def __init__(self, win):
         self._init()
         self.win = win
+        self.notation = []
 
     def update(self):
         self.board.draw(self.win)
@@ -47,14 +48,18 @@ class Game:
     def _move(self, row, col):
         piece = self.board.get_piece(row, col)
         if self.selected and piece == 0 and (row, col) in self.valid_moves:
-            self.board.move(self.selected, row, col)
+            st, en = self.board.move(self.selected, row, col)
+            com = '-'
+            end = '\n' if self.selected.color == RED else '\t\t\t'
             skipped = self.valid_moves[(row, col)]
             if skipped:
+                com = 'x' * len(skipped)
                 self.board.remove(skipped)
             if self.selected.king:
                 self.moves_to_draw -= 1
             else:
                 self.moves_to_draw = 15
+            print(st, com, en, end=end)
             self.change_turn()
         else:
             return False
