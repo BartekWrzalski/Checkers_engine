@@ -1,5 +1,5 @@
 import pygame
-from .constants import BLACK, ROWS, RED, SQUARE_SIZE, COLS, WHITE, FIELD_NUMBERS
+from .constants import *
 from .piece import Piece
 
 
@@ -77,6 +77,19 @@ class Board:
                 return WHITE
 
         return None
+
+    def validate_one(self, turn):
+        evaluation = 0.1 if turn == WHITE else -0.1
+
+        for i, row in enumerate(self.board):
+            for j, piece in enumerate(row):
+                if piece != 0:
+                    is_white = piece.color == WHITE
+                    if not piece.king:
+                        evaluation += FIELD_PAWN_VALUES[i] if is_white else -FIELD_PAWN_VALUES[-i - 1]
+                    else:
+                        evaluation += FIELD_KING_VALUES[i][j] if is_white else -FIELD_KING_VALUES[-i - 1][-j - 1]
+        return evaluation
 
     def get_valid_moves(self, piece, length=None):
         moves = {}

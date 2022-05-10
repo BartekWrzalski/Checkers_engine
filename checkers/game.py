@@ -7,7 +7,6 @@ class Game:
     def __init__(self, win):
         self._init()
         self.win = win
-        self.notation = []
 
     def update(self):
         self.board.draw(self.win)
@@ -59,8 +58,9 @@ class Game:
                 self.moves_to_draw -= 1
             else:
                 self.moves_to_draw = 15
-            print(st, com, en, end=end)
+            # print(st, com, en, end=end)
             self.change_turn()
+            self.validate_first()
         else:
             return False
 
@@ -80,3 +80,7 @@ class Game:
         else:
             self.turn = RED
             self.move_length = self.board.get_longest_move(RED)
+
+    def validate_first(self):
+        evaluation = self.board.validate_one(self.turn)
+        print(evaluation)
