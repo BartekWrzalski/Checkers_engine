@@ -1,6 +1,10 @@
+import math
+import random
+
 import pygame
 from .constants import *
 from .piece import Piece
+import copy
 
 
 class Board:
@@ -96,12 +100,13 @@ class Board:
 
         for i, row in enumerate(self.board):
             for j, piece in enumerate(row):
-                if piece != 0:
-                    is_white = piece.color == WHITE
-                    if not piece.king:
-                        evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
-                    else:
-                        evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
+                if piece == 0:
+                    continue
+                is_white = piece.color == WHITE
+                if not piece.king:
+                    evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
+                else:
+                    evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
         return round(evaluation, 2)
 
     def get_valid_moves(self, piece, length=None):
@@ -284,14 +289,59 @@ class Board:
         longest = -1
         for row in self.board:
             for tile in row:
-                if tile != 0:
-                    if tile.color == color:
-                        moves = self.get_valid_moves(tile)
-                        if moves:
-                            moves = dict(sorted(moves.items(), key=lambda k: len(k[1]), reverse=True))
-                            longest_local = len(list(moves.values())[0])
-                            if longest_local > longest:
-                                longest = longest_local
+                if tile == 0:
+                    continue
+                if tile.color == color:
+                    moves = self.get_valid_moves(tile)
+                    if moves:
+                        moves = dict(sorted(moves.items(), key=lambda k: len(k[1]), reverse=True))
+                        longest_local = len(list(moves.values())[0])
+                        if longest_local > longest:
+                            longest = longest_local
         if longest == -1:
             self.can_move = False
         return longest
+
+    def minmax(self, turn, move_length, board):
+        opposite = RED if turn == WHITE else WHITE
+        best_val_1 = math.inf if turn == RED else -math.inf
+        valuations, pawns, moves, to_skip = [], [], [], []
+
+        copy_board = copy.deepcopy(board.board)
+        for i, row in enumerate(copy_board):
+            for j, tile in enumerate(row):
+                if tile == 0:
+                    continue
+                if tile.color == turn:
+                    l_moves = board.get_valid_moves(tile, move_length)
+
+                    pos = tile.get_pos()
+                    for move, skipped in l_moves.items():
+                        board.move(tile, move[0], move[1])
+                        if skipped:
+                            board.remove(skipped)
+                        evaluation = board.validate_two(opposite)
+                        valuations.append(evaluation)
+                        pawns.append(self.board[i][j])
+                        moves.append(move)
+                        to_skip.append(skipped)
+                        board.board = copy.deepcopy(copy_board)
+                        print(f'{evaluation:<9}{pos} --> {move}: {skipped}')
+        best_val_id = []
+        for i, value in enumerate(valuations):
+            if turn == WHITE:
+                if value > best_val_1:
+                    best_val_1 = value
+                    best_val_id = [i]
+                elif value == best_val_1:
+                    best_val_id.append(i)
+            else:
+                if value < best_val_1:
+                    best_val_1 = value
+                    best_val_id = [i]
+                elif value == best_val_1:
+                    best_val_id.append(i)
+
+        chosen = random.choice(best_val_id)
+        return pawns[chosen], moves[chosen], to_skip[chosen]
+

@@ -1,12 +1,35 @@
+import copy
+import time
 import pygame
 from .constants import RED, WHITE, BLUE, SQUARE_SIZE, DRAW
 from checkers.board import Board
 
 
 class Game:
-    def __init__(self, win):
+    def __init__(self, win, mode='pvp'):
         self._init()
         self.win = win
+        self.mode = mode
+        self._playmode()
+        self.update()
+
+    def _playmode(self):
+        match self.mode:
+            case 'pvp':
+                self._pvp()
+            case 'ivi':
+                self._ivi()
+
+    def _pvp(self):
+        self.board.minmax(self.turn,
+                          self.board.get_longest_move(self.turn),
+                          copy.deepcopy(self.board))
+
+    def _ivi(self):
+        self.selected, self.move, self.to_skip = self.board.minmax(self.turn,
+                                                                   self.board.get_longest_move(self.turn),
+                                                                   copy.deepcopy(self.board))
+        self._moveAI(self.move[0], self.move[1], self.to_skip)
 
     def update(self):
         self.board.draw(self.win)
@@ -60,13 +83,25 @@ class Game:
                 self.moves_to_draw = 15
             # print(st, com, en, end=end)
             self.change_turn()
-            self.validate_first()
-            self.validation_second()
-            print()
-        else:
-            return False
+            # self.validate_first()
+            # self.validation_second()
+            # print()
+            return True
 
-        return True
+        return False
+
+    def _moveAI(self, row, col, skipped):
+        print(self.selected.get_pos(), row, col, skipped)
+        self.board.move(self.selected, row, col)
+        if skipped:
+            self.board.remove(skipped)
+        if self.selected.king:
+            self.moves_to_draw -= 1
+        else:
+            self.moves_to_draw = 15
+        time.sleep(0.5)
+        self.update()
+        self.change_turn()
 
     def draw_valid_moves(self, moves):
         for move in moves:
@@ -82,6 +117,7 @@ class Game:
         else:
             self.turn = RED
             self.move_length = self.board.get_longest_move(RED)
+        self._playmode()
 
     def validate_first(self):
         evaluation = self.board.validate_one(self.turn)
