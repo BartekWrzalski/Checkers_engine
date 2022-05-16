@@ -7,11 +7,8 @@ from checkers.board import Board
 
 class Game:
     def __init__(self, win, mode='pvp'):
-        self._init()
         self.win = win
         self.mode = mode
-        self._playmode()
-        self.update()
 
     def _playmode(self):
         match self.mode:
@@ -19,6 +16,8 @@ class Game:
                 self._pvp()
             case 'ivi':
                 self._ivi()
+            case 'pvi':
+                self._pvi()
 
     def _pvp(self):
         self.board.minmax(self.turn,
@@ -26,10 +25,19 @@ class Game:
                           copy.deepcopy(self.board))
 
     def _ivi(self):
-        self.selected, self.move, self.to_skip = self.board.minmax(self.turn,
+        if self.winner():
+            return
+        self.selected, move, to_skip = self.board.minmax(self.turn,
                                                                    self.board.get_longest_move(self.turn),
                                                                    copy.deepcopy(self.board))
-        self._moveAI(self.move[0], self.move[1], self.to_skip)
+        if move:
+            self._moveAI(move[0], move[1], to_skip)
+
+    def _pvi(self):
+        if self.turn == WHITE:
+            self._pvp()
+        else:
+            self._ivi()
 
     def update(self):
         self.board.draw(self.win)
@@ -44,10 +52,19 @@ class Game:
         self.move_length = 0
         self.moves_to_draw = 15
 
+    def start_game(self):
+        self._init()
+        self.update()
+        self._playmode()
+
     def winner(self):
         if self.moves_to_draw == 0:
-            return DRAW
-        return self.board.winner(self.turn)
+            print(DRAW)
+        winner = self.board.winner(self.turn)
+        if winner:
+            print(winner)
+            return True
+        return False
 
     def reset(self):
         self._init()
@@ -91,7 +108,6 @@ class Game:
         return False
 
     def _moveAI(self, row, col, skipped):
-        print(self.selected.get_pos(), row, col, skipped)
         self.board.move(self.selected, row, col)
         if skipped:
             self.board.remove(skipped)
@@ -100,7 +116,6 @@ class Game:
         else:
             self.moves_to_draw = 15
         time.sleep(0.5)
-        self.update()
         self.change_turn()
 
     def draw_valid_moves(self, moves):
@@ -111,6 +126,7 @@ class Game:
 
     def change_turn(self):
         self.valid_moves = {}
+        self.update()
         if self.turn == RED:
             self.turn = WHITE
             self.move_length = self.board.get_longest_move(WHITE)

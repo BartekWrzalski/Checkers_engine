@@ -327,6 +327,8 @@ class Board:
                         to_skip.append(skipped)
                         board.board = copy.deepcopy(copy_board)
                         print(f'{evaluation:<9}{pos} --> {move}: {skipped}')
+        if not moves:
+            return None, None, None
         best_val_id = []
         for i, value in enumerate(valuations):
             if turn == WHITE:
