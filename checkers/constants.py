@@ -16,7 +16,7 @@ FIELD_NUMBERS = [
     [29, None,  30, None,   31, None,   32, None]
 ]
 
-# first validation
+# first validation - row values
 PAWN_VALUES_ONE = [3, 1.8, 1.6, 1.4, 1.4, 1.4, 1.2, 1]
 
 # second validation
