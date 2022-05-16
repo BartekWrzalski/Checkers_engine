@@ -17,7 +17,7 @@ FIELD_NUMBERS = [
 ]
 
 # first validation
-PAWN_VALUES_ONE = [None, 1.8, 1.6, 1.4, 1.4, 1.4, 1.2, 1]
+PAWN_VALUES_ONE = [3, 1.8, 1.6, 1.4, 1.4, 1.4, 1.2, 1]
 
 # second validation
 PAWN_VALUES_TWO = [
