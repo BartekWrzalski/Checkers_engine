@@ -1,11 +1,11 @@
 import pygame
-from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE
+from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_WIDTH
 from checkers.game import Game
 
 
 FPS = 60
 GAMES = 10
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+WIN = pygame.display.set_mode((WIDTH + INFO_WIDTH, HEIGHT))
 pygame.display.set_caption('Checkers')
 
 
