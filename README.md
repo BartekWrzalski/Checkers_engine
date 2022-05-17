@@ -9,4 +9,4 @@ There is 2 heuristics to valuate the position, both static (for now). You can lo
 
 There is 3 way to play, player vs player, AI vs AI and player vs AI (for now only as white).
 
-The `min-max` algorithm is implemented, but only in depth 1. `alfa-beta` is yet to be implemented.
+The `min-max` algorithm is implemented. `alfa-beta` is yet to be implemented.
