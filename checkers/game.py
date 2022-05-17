@@ -1,7 +1,7 @@
 import copy
 import time
 import pygame
-from .constants import RED, WHITE, BLUE, SQUARE_SIZE, DRAW
+from .constants import *
 from checkers.board import Board
 
 
@@ -10,39 +10,10 @@ class Game:
         self.win = win
         self.mode = mode
 
-    def _playmode(self):
-        match self.mode:
-            case 'pvp':
-                self._pvp()
-            case 'ivi':
-                self._ivi()
-            case 'pvi':
-                self._pvi()
-
-    def _pvp(self):
-        self.board.minmax(self.turn,
-                          self.board.get_longest_move(self.turn),
-                          copy.deepcopy(self.board))
-
-    def _ivi(self):
-        if self.winner():
-            return
-        self.selected, move, to_skip = self.board.minmax(self.turn,
-                                                                   self.board.get_longest_move(self.turn),
-                                                                   copy.deepcopy(self.board))
-        if move:
-            self._moveAI(move[0], move[1], to_skip)
-
-    def _pvi(self):
-        if self.turn == WHITE:
-            self._pvp()
-        else:
-            self._ivi()
-
-    def update(self):
-        self.board.draw(self.win)
-        self.draw_valid_moves(self.valid_moves)
-        pygame.display.update()
+    def start_game(self):
+        self._init()
+        self.update()
+        self._playmode()
 
     def _init(self):
         self.selected = None
@@ -52,10 +23,47 @@ class Game:
         self.move_length = 0
         self.moves_to_draw = 15
 
-    def start_game(self):
-        self._init()
-        self.update()
-        self._playmode()
+    def _playmode(self):
+        match self.mode:
+            case 'pvp':
+                return
+            case 'ivi':
+                self._ivi()
+            case 'pvi':
+                self._pvi()
+    """
+    def _pvp(self):
+        self.board.minmax(self.turn,
+                          self.move_length,
+                          copy.deepcopy(self.board))
+    """
+    def _ivi(self):
+        if self.winner():
+            return
+        _, (self.selected, move, to_skip) = self.board.minmax(self.turn,
+                                                              self.move_length,
+                                                              3,
+                                                              1)
+        if move:
+            self._moveAI(move[0], move[1], to_skip)
+
+    def _pvi(self):
+        if self.turn == WHITE:
+            return
+        else:
+            self._ivi()
+
+    def update(self):
+        self.board.draw(self.win)
+        self.draw_evaluated_moves()
+        self.draw_valid_moves(self.valid_moves)
+        pygame.display.update()
+
+    def draw_evaluated_moves(self):
+        eval1_str = VALUATION_FONT.render('E1: ' + str(self.board.validate_one(self.turn)), True, BLACK)
+        eval2_str = VALUATION_FONT.render('E2: ' + str(self.board.validate_two(self.turn)), True, BLACK)
+        self.win.blit(eval1_str, (WIDTH + 10, WIDTH // 2 + 10))
+        self.win.blit(eval2_str, (WIDTH + 10, 3 * WIDTH // 4 + 10))
 
     def winner(self):
         if self.moves_to_draw == 0:
@@ -70,6 +78,9 @@ class Game:
         self._init()
 
     def select(self, row, col):
+        if col >= COLS:
+            return False
+
         if self.selected:
             result = self._move(row, col)
             if not result:
@@ -89,7 +100,6 @@ class Game:
         if self.selected and piece == 0 and (row, col) in self.valid_moves:
             st, en = self.board.move(self.selected, row, col)
             com = '-'
-            end = '\n' if self.selected.color == RED else '\t\t\t'
             skipped = self.valid_moves[(row, col)]
             if skipped:
                 com = 'x' * len(skipped)
@@ -98,24 +108,24 @@ class Game:
                 self.moves_to_draw -= 1
             else:
                 self.moves_to_draw = 15
-            # print(st, com, en, end=end)
+            self.board.update_notation(f'{st} {com} {en}')
             self.change_turn()
-            # self.validate_first()
-            # self.validation_second()
-            # print()
             return True
 
         return False
 
     def _moveAI(self, row, col, skipped):
-        self.board.move(self.selected, row, col)
+        st, en = self.board.move(self.selected, row, col)
+        com = '-'
         if skipped:
+            com = 'x' * len(skipped)
             self.board.remove(skipped)
         if self.selected.king:
             self.moves_to_draw -= 1
         else:
             self.moves_to_draw = 15
-        time.sleep(0.5)
+        self.board.update_notation(f'{st} {com} {en}')
+        time.sleep(0.1)
         self.change_turn()
 
     def draw_valid_moves(self, moves):
