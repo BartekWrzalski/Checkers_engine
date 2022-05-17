@@ -75,12 +75,13 @@ class Board:
         en = FIELD_NUMBERS[row][col]
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         self.board[row][col].move(row, col)
-        if row == ROWS - 1 or row == 0:
+
+        if row == ROWS - 1 and self.board[row][col].color == RED:
             self.board[row][col].make_king()
-            if self.board[row][col].color == WHITE:
-                self.white_kings += 1
-            else:
-                self.red_kings += 1
+            self.red_kings += 1
+        if row == 0 and self.board[row][col].color == WHITE:
+            self.board[row][col].make_king()
+            self.white_kings += 1
         return st, en
 
     def update_notation(self, move):
@@ -248,7 +249,7 @@ class Board:
             current = self.board[r][left]
             if current == 0:
                 if skipped and not last:
-                    break
+                    continue
                 elif skipped:
                     moves[(r, left)] = last + skipped
                 else:
@@ -256,7 +257,6 @@ class Board:
 
                 if last:
                     last += skipped
-                    moves.update(self._traverse_left_king(r + step, stop, step, color, left - 1, skipped=last))
                     moves.update(
                         self._traverse_left_king(r - step, ROWS - stop - 1, -step, color, left - 1, skipped=last))
                     moves.update(self._traverse_right_king(r + step, stop, step, color, left + 1, skipped=last))
@@ -281,7 +281,7 @@ class Board:
             current = self.board[r][right]
             if current == 0:
                 if skipped and not last:
-                    break
+                    continue
                 elif skipped:
                     moves[(r, right)] = last + skipped
                 else:
@@ -290,7 +290,6 @@ class Board:
                 if last:
                     last += skipped
                     moves.update(self._traverse_left_king(r + step, stop, step, color, right - 1, skipped=last))
-                    moves.update(self._traverse_right_king(r + step, stop, step, color, right + 1, skipped=last))
                     moves.update(
                         self._traverse_right_king(r - step, ROWS - stop - 1, -step, color, right + 1, skipped=last))
             elif current.color == color or last:
@@ -371,12 +370,18 @@ class Board:
                     board.remove(skipped)
                 eval, _ = board.minmax(opposite, board.get_longest_move(opposite), depth - 1, heuristic)
                 if turn == WHITE:
-                    if eval >= best_val:
+                    if eval > best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    elif eval == best_val:
                         if not best_move or (best_move and random() < 0.5):
                             best_val = eval
                             best_move = (piece, move, skipped)
                 else:
-                    if eval <= best_val:
+                    if eval < best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    elif eval == best_val:
                         if not best_move or (best_move and random() < 0.5):
                             best_val = eval
                             best_move = (piece, move, skipped)
@@ -406,7 +411,10 @@ class Board:
                 eval, _ = board.alfa_beta(opposite, board.get_longest_move(opposite), depth - 1, alpha, beta, heuristic)
 
                 if turn == WHITE:
-                    if eval >= best_val:
+                    if eval > best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    elif eval == best_val:
                         if not best_move or (best_move and random() < 0.5):
                             best_val = eval
                             best_move = (piece, move, skipped)
@@ -414,7 +422,10 @@ class Board:
                     if beta <= alpha:
                         break
                 else:
-                    if eval <= best_val:
+                    if eval < best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    elif eval == best_val:
                         if not best_move or (best_move and random() < 0.5):
                             best_val = eval
                             best_move = (piece, move, skipped)
@@ -422,3 +433,15 @@ class Board:
                     if beta <= alpha:
                         break
         return best_val, best_move
+
+    def __str__(self):
+        for row in self.board:
+            for tile in row:
+                if tile == 0:
+                    print('-', end=' ')
+                elif tile.color == WHITE:
+                    print('w', end=' ')
+                elif tile.color == RED:
+                    print('r', end=' ')
+            print()
+        print()
