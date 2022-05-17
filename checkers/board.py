@@ -1,10 +1,9 @@
 import math
-import random
-
+from random import random
 import pygame
 from .constants import *
 from .piece import Piece
-import copy
+from copy import deepcopy
 
 
 class Board:
@@ -14,28 +13,82 @@ class Board:
         self.red_kings = self.white_kings = 0
         self.create_board()
         self.can_move = True
+        self.notation = []
+        self.skipped_notation_moves = 1
 
     def draw_squares(self, win):
-        win.fill(BLACK)
         for row in range(ROWS):
-            for col in range(row % 2, COLS, 2):
-                pygame.draw.rect(win, WHITE, (row * SQUARE_SIZE, col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+            for col in range((row + 1) % 2, COLS, 2):
+                pygame.draw.rect(win, BLACK, (row * SQUARE_SIZE, col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                number = NUMBER_FONT.render(str(FIELD_NUMBERS[col][row]), True, WHITE)
+                win.blit(number, ((row + 0.75) * SQUARE_SIZE, (col + 0.75) * SQUARE_SIZE))
+
+    def draw_skeleton(self, win):
+        win.fill(WHITE)
+        pygame.draw.line(win, BLACK, (0, 0), (WIDTH + INFO_WIDTH, 0), 2)
+        pygame.draw.line(win, BLACK, (0, 0), (0, HEIGHT), 2)
+        pygame.draw.line(win, BLACK, (0, HEIGHT - 2), (WIDTH + INFO_WIDTH, HEIGHT - 2), 2)
+        pygame.draw.line(win, BLACK, (WIDTH - 2, 0), (WIDTH - 2, HEIGHT), 2)
+        pygame.draw.rect(win, WHITE, (WIDTH, 2, INFO_WIDTH - 2, HEIGHT - 4))
+        pygame.draw.line(win, BLACK, (WIDTH, HEIGHT // 2), (WIDTH + INFO_WIDTH, HEIGHT // 2), 2)
+        pygame.draw.line(win, BLACK, (WIDTH, 3 * HEIGHT // 4), (WIDTH + INFO_WIDTH, 3 * HEIGHT // 4), 2)
+
+    def draw_notation(self, win):
+        notation = NOTATION_FONT.render('Notation', True, BLACK)
+        win.blit(notation, (WIDTH + 20, 10))
+
+        for i, move in enumerate(self.notation):
+            if i % 2 == 0:
+                move_number = NOTATION_FONT.render(str(i // 2 + self.skipped_notation_moves) + '.', True, BLACK)
+                win.blit(move_number, (WIDTH + 20, 30 + (i // 2) * 20))
+
+                white_move = NOTATION_FONT.render(move, True, BLACK)
+                win.blit(white_move, (WIDTH + 45, 30 + (i // 2) * 20))
+            else:
+                red_move = NOTATION_FONT.render(move, True, BLACK)
+                win.blit(red_move, (WIDTH + 155, 30 + (i // 2) * 20))
+
+    def draw(self, win):
+        self.draw_skeleton(win)
+        self.draw_squares(win)
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.board[row][col]
+                if piece != 0:
+                    piece.draw(win)
+        self.draw_notation(win)
 
     def move(self, piece, row, col):
         st = FIELD_NUMBERS[piece.row][piece.col]
         en = FIELD_NUMBERS[row][col]
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
-        piece.move(row, col)
+        self.board[row][col].move(row, col)
         if row == ROWS - 1 or row == 0:
-            piece.make_king()
-            if piece.color == WHITE:
+            self.board[row][col].make_king()
+            if self.board[row][col].color == WHITE:
                 self.white_kings += 1
             else:
                 self.red_kings += 1
         return st, en
 
+    def update_notation(self, move):
+        self.notation.append(move)
+        if len(self.notation) >= 36:
+            self.notation = self.notation[2:]
+            self.skipped_notation_moves += 1
+
     def get_piece(self, row, col):
         return self.board[row][col]
+
+    def get_pieces(self, turn):
+        pieces = []
+        for row in self.board:
+            for tile in row:
+                if tile == 0:
+                    continue
+                if tile.color == turn:
+                    pieces.append(tile)
+        return pieces
 
     def create_board(self):
         for row in range(ROWS):
@@ -50,14 +103,6 @@ class Board:
                         self.board[row].append(0)
                 else:
                     self.board[row].append(0)
-
-    def draw(self, win):
-        self.draw_squares(win)
-        for row in range(ROWS):
-            for col in range(COLS):
-                piece = self.board[row][col]
-                if piece != 0:
-                    piece.draw(win)
 
     def remove(self, pieces):
         for piece in pieces:
@@ -165,7 +210,8 @@ class Board:
                         row = min(r + 3, ROWS)
                         opposite = max(r - 3, -1)
                     moves.update(self._traverse_left(r + step, row, step, color, left - 1, forward, skipped=last))
-                    moves.update(self._traverse_left(r - step, opposite, -step, color, left - 1, not forward, skipped=last))
+                    moves.update(
+                        self._traverse_left(r - step, opposite, -step, color, left - 1, not forward, skipped=last))
                     moves.update(self._traverse_right(r + step, row, step, color, left + 1, forward, skipped=last))
                 break
             elif current.color == color:
@@ -207,7 +253,8 @@ class Board:
                         opposite = max(r - 3, -1)
                     moves.update(self._traverse_left(r + step, row, step, color, right - 1, forward, skipped=last))
                     moves.update(self._traverse_right(r + step, row, step, color, right + 1, forward, skipped=last))
-                    moves.update(self._traverse_right(r - step, opposite, -step, color, right + 1, not forward, skipped=last))
+                    moves.update(
+                        self._traverse_right(r - step, opposite, -step, color, right + 1, not forward, skipped=last))
                 break
             elif current.color == color:
                 break
@@ -239,7 +286,8 @@ class Board:
                 if last:
                     last += skipped
                     moves.update(self._traverse_left_king(r + step, stop, step, color, left - 1, skipped=last))
-                    moves.update(self._traverse_left_king(r - step, ROWS - stop - 1, -step, color, left - 1, skipped=last))
+                    moves.update(
+                        self._traverse_left_king(r - step, ROWS - stop - 1, -step, color, left - 1, skipped=last))
                     moves.update(self._traverse_right_king(r + step, stop, step, color, left + 1, skipped=last))
             elif current.color == color or last:
                 break
@@ -302,48 +350,35 @@ class Board:
             self.can_move = False
         return longest
 
-    def minmax(self, turn, move_length, board):
+    def minmax(self, turn, move_length, depth, heuristic='1'):
         opposite = RED if turn == WHITE else WHITE
-        best_val_1 = math.inf if turn == RED else -math.inf
-        valuations, pawns, moves, to_skip = [], [], [], []
+        best_val = -math.inf if turn == WHITE else math.inf
+        best_move = None
 
-        copy_board = copy.deepcopy(board.board)
-        for i, row in enumerate(copy_board):
-            for j, tile in enumerate(row):
-                if tile == 0:
-                    continue
-                if tile.color == turn:
-                    l_moves = board.get_valid_moves(tile, move_length)
+        if depth == 0 or self.winner(turn):
+            match heuristic:
+                case 1:
+                    return self.validate_one(turn), None
+                case 2:
+                    return self.validate_two(turn), None
+            return None, None
 
-                    pos = tile.get_pos()
-                    for move, skipped in l_moves.items():
-                        board.move(tile, move[0], move[1])
-                        if skipped:
-                            board.remove(skipped)
-                        evaluation = board.validate_two(opposite)
-                        valuations.append(evaluation)
-                        pawns.append(self.board[i][j])
-                        moves.append(move)
-                        to_skip.append(skipped)
-                        board.board = copy.deepcopy(copy_board)
-                        print(f'{evaluation:<9}{pos} --> {move}: {skipped}')
-        if not moves:
-            return None, None, None
-        best_val_id = []
-        for i, value in enumerate(valuations):
-            if turn == WHITE:
-                if value > best_val_1:
-                    best_val_1 = value
-                    best_val_id = [i]
-                elif value == best_val_1:
-                    best_val_id.append(i)
-            else:
-                if value < best_val_1:
-                    best_val_1 = value
-                    best_val_id = [i]
-                elif value == best_val_1:
-                    best_val_id.append(i)
+        for piece in self.get_pieces(turn):
+            l_moves = self.get_valid_moves(piece, move_length)
 
-        chosen = random.choice(best_val_id)
-        return pawns[chosen], moves[chosen], to_skip[chosen]
-
+            for move, skipped in l_moves.items():
+                board = deepcopy(self)
+                board.move(piece, move[0], move[1])
+                if skipped:
+                    board.remove(skipped)
+                eval, _ = board.minmax(opposite, board.get_longest_move(opposite), depth - 1, heuristic)
+                if turn == WHITE:
+                    if eval > best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    return best_val, best_move
+                else:
+                    if eval < best_val:
+                        best_val = eval
+                        best_move = (piece, move, skipped)
+                    return best_val, best_move
