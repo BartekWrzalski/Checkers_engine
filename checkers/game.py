@@ -11,11 +11,12 @@ class Game:
         self.win = win
         self.mode = mode
 
-    def start_game(self, heuristic=1, depth=3, algorithm='min-max'):
+    def start_game(self, heuristic=1, depth=3, algorithm='min-max', player_color=WHITE):
         self._init()
         self.heur_num = heuristic
         self.depth = depth
         self.algorithm = algorithm
+        self.player_one_color = player_color
         self.update()
         self._playmode()
 
@@ -57,7 +58,7 @@ class Game:
             self._moveAI(move[0], move[1], to_skip)
 
     def _pvi(self):
-        if self.turn == WHITE:
+        if self.turn == self.player_one_color:
             return
         else:
             self._ivi()

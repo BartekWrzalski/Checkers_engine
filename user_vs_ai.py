@@ -1,5 +1,5 @@
 import pygame
-from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_WIDTH
+from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_WIDTH, WHITE, RED
 from checkers.game import Game
 
 
@@ -22,7 +22,7 @@ def main():
 
     for i in range(GAMES):
         run = True
-        game.start_game()
+        game.start_game(2, 4, 'alfa-beta', RED)
 
         while run:
             clock.tick(FPS)
