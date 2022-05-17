@@ -1,4 +1,5 @@
 import copy
+import math
 import time
 import pygame
 from .constants import *
@@ -6,12 +7,15 @@ from checkers.board import Board
 
 
 class Game:
-    def __init__(self, win, mode='pvp'):
+    def __init__(self, win, mode='pvp', depth=3, algorithm='min-max'):
         self.win = win
         self.mode = mode
 
-    def start_game(self):
+    def start_game(self, heuristic=1, depth=3, algorithm='min-max'):
         self._init()
+        self.heur_num = heuristic
+        self.depth = depth
+        self.algorithm = algorithm
         self.update()
         self._playmode()
 
@@ -40,10 +44,20 @@ class Game:
     def _ivi(self):
         if self.winner():
             return
-        _, (self.selected, move, to_skip) = self.board.minmax(self.turn,
-                                                              self.move_length,
-                                                              3,
-                                                              1)
+
+        match self.algorithm:
+            case 'min-max':
+                _, (self.selected, move, to_skip) = self.board.minmax(self.turn,
+                                                                      self.board.get_longest_move(self.turn),
+                                                                      self.depth,
+                                                                      self.heur_num)
+            case 'alfa-beta':
+                _, (self.selected, move, to_skip) = self.board.alfa_beta(self.turn,
+                                                                         self.board.get_longest_move(self.turn),
+                                                                         self.depth,
+                                                                         -math.inf,
+                                                                         math.inf,
+                                                                         self.heur_num)
         if move:
             self._moveAI(move[0], move[1], to_skip)
 
@@ -125,7 +139,7 @@ class Game:
         else:
             self.moves_to_draw = 15
         self.board.update_notation(f'{st} {com} {en}')
-        time.sleep(0.1)
+        time.sleep(0.05)
         self.change_turn()
 
     def draw_valid_moves(self, moves):
