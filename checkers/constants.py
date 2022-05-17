@@ -1,6 +1,7 @@
 import pygame
 
 WIDTH, HEIGHT = 800, 800
+INFO_WIDTH = 300
 ROWS, COLS = 8, 8
 SQUARE_SIZE = WIDTH//COLS
 
@@ -49,6 +50,12 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREY = (128, 128, 128)
+
+# fonts
+pygame.font.init()
+NUMBER_FONT = pygame.font.SysFont('Times New Roman', 24)
+VALUATION_FONT = pygame.font.SysFont('Times New Roman', 40)
+NOTATION_FONT = pygame.font.SysFont('Times New Roman', 16)
 
 DRAW = 'draw'
 CROWN = pygame.transform.scale(pygame.image.load('assets/crown.png'), (44, 25))
