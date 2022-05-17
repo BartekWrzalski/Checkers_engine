@@ -7,7 +7,7 @@ from checkers.board import Board
 
 
 class Game:
-    def __init__(self, win, mode='pvp', depth=3, algorithm='min-max'):
+    def __init__(self, win, mode='pvp'):
         self.win = win
         self.mode = mode
 
@@ -35,12 +35,7 @@ class Game:
                 self._ivi()
             case 'pvi':
                 self._pvi()
-    """
-    def _pvp(self):
-        self.board.minmax(self.turn,
-                          self.move_length,
-                          copy.deepcopy(self.board))
-    """
+
     def _ivi(self):
         if self.winner():
             return
@@ -69,15 +64,14 @@ class Game:
 
     def update(self):
         self.board.draw(self.win)
-        self.draw_evaluated_moves()
         self.draw_valid_moves(self.valid_moves)
         pygame.display.update()
 
-    def draw_evaluated_moves(self):
-        eval1_str = VALUATION_FONT.render('E1: ' + str(self.board.validate_one(self.turn)), True, BLACK)
-        eval2_str = VALUATION_FONT.render('E2: ' + str(self.board.validate_two(self.turn)), True, BLACK)
-        self.win.blit(eval1_str, (WIDTH + 10, WIDTH // 2 + 10))
-        self.win.blit(eval2_str, (WIDTH + 10, 3 * WIDTH // 4 + 10))
+    def draw_valid_moves(self, moves):
+        for move in moves:
+            row, col = move
+            pygame.draw.circle(self.win, BLUE,
+                               (col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2), 15)
 
     def winner(self):
         if self.moves_to_draw == 0:
@@ -89,7 +83,7 @@ class Game:
         return False
 
     def reset(self):
-        self._init()
+        self.start_game(self.heur_num, self.depth, self.algorithm)
 
     def select(self, row, col):
         if col >= COLS:
@@ -142,12 +136,6 @@ class Game:
         time.sleep(0.05)
         self.change_turn()
 
-    def draw_valid_moves(self, moves):
-        for move in moves:
-            row, col = move
-            pygame.draw.circle(self.win, BLUE,
-                               (col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2), 15)
-
     def change_turn(self):
         self.valid_moves = {}
         self.update()
@@ -158,11 +146,3 @@ class Game:
             self.turn = RED
             self.move_length = self.board.get_longest_move(RED)
         self._playmode()
-
-    def validate_first(self):
-        evaluation = self.board.validate_one(self.turn)
-        print(evaluation)
-
-    def validation_second(self):
-        evaluation = self.board.validate_two(self.turn)
-        print(evaluation)

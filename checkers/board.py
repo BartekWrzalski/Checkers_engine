@@ -16,6 +16,20 @@ class Board:
         self.notation = []
         self.skipped_notation_moves = 1
 
+    def create_board(self):
+        for row in range(ROWS):
+            self.board.append([])
+            for col in range(COLS):
+                if col % 2 == ((row + 1) % 2):
+                    if row < 3:
+                        self.board[row].append(Piece(row, col, RED))
+                    elif row > 4:
+                        self.board[row].append(Piece(row, col, WHITE))
+                    else:
+                        self.board[row].append(0)
+                else:
+                    self.board[row].append(0)
+
     def draw_squares(self, win):
         for row in range(ROWS):
             for col in range((row + 1) % 2, COLS, 2):
@@ -30,8 +44,6 @@ class Board:
         pygame.draw.line(win, BLACK, (0, HEIGHT - 2), (WIDTH + INFO_WIDTH, HEIGHT - 2), 2)
         pygame.draw.line(win, BLACK, (WIDTH - 2, 0), (WIDTH - 2, HEIGHT), 2)
         pygame.draw.rect(win, WHITE, (WIDTH, 2, INFO_WIDTH - 2, HEIGHT - 4))
-        pygame.draw.line(win, BLACK, (WIDTH, HEIGHT // 2), (WIDTH + INFO_WIDTH, HEIGHT // 2), 2)
-        pygame.draw.line(win, BLACK, (WIDTH, 3 * HEIGHT // 4), (WIDTH + INFO_WIDTH, 3 * HEIGHT // 4), 2)
 
     def draw_notation(self, win):
         notation = NOTATION_FONT.render('Notation', True, BLACK)
@@ -73,7 +85,7 @@ class Board:
 
     def update_notation(self, move):
         self.notation.append(move)
-        if len(self.notation) >= 36:
+        if len(self.notation) >= 72:
             self.notation = self.notation[2:]
             self.skipped_notation_moves += 1
 
@@ -89,20 +101,6 @@ class Board:
                 if tile.color == turn:
                     pieces.append(tile)
         return pieces
-
-    def create_board(self):
-        for row in range(ROWS):
-            self.board.append([])
-            for col in range(COLS):
-                if col % 2 == ((row + 1) % 2):
-                    if row < 3:
-                        self.board[row].append(Piece(row, col, RED))
-                    elif row > 4:
-                        self.board[row].append(Piece(row, col, WHITE))
-                    else:
-                        self.board[row].append(0)
-                else:
-                    self.board[row].append(0)
 
     def remove(self, pieces):
         for piece in pieces:
@@ -126,33 +124,6 @@ class Board:
                 return WHITE
 
         return None
-
-    def validate_one(self, turn):
-        evaluation = 0.1 if turn == WHITE else -0.1
-
-        for i, row in enumerate(self.board):
-            for j, piece in enumerate(row):
-                if piece != 0:
-                    is_white = piece.color == WHITE
-                    if not piece.king:
-                        evaluation += PAWN_VALUES_ONE[i] if is_white else -PAWN_VALUES_ONE[-i - 1]
-                    else:
-                        evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
-        return round(evaluation, 2)
-
-    def validate_two(self, turn):
-        evaluation = 0.1 if turn == WHITE else -0.1
-
-        for i, row in enumerate(self.board):
-            for j, piece in enumerate(row):
-                if piece == 0:
-                    continue
-                is_white = piece.color == WHITE
-                if not piece.king:
-                    evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
-                else:
-                    evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
-        return round(evaluation, 2)
 
     def get_valid_moves(self, piece, length=None):
         moves = {}
@@ -349,6 +320,33 @@ class Board:
         if longest == -1:
             self.can_move = False
         return longest
+
+    def validate_one(self, turn):
+        evaluation = 0.1 if turn == WHITE else -0.1
+
+        for i, row in enumerate(self.board):
+            for j, piece in enumerate(row):
+                if piece != 0:
+                    is_white = piece.color == WHITE
+                    if not piece.king:
+                        evaluation += PAWN_VALUES_ONE[i] if is_white else -PAWN_VALUES_ONE[-i - 1]
+                    else:
+                        evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
+        return round(evaluation, 2)
+
+    def validate_two(self, turn):
+        evaluation = 0.1 if turn == WHITE else -0.1
+
+        for i, row in enumerate(self.board):
+            for j, piece in enumerate(row):
+                if piece == 0:
+                    continue
+                is_white = piece.color == WHITE
+                if not piece.king:
+                    evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
+                else:
+                    evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
+        return round(evaluation, 2)
 
     def minmax(self, turn, move_length, depth, heuristic='1'):
         opposite = RED if turn == WHITE else WHITE
