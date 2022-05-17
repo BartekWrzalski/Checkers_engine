@@ -373,12 +373,54 @@ class Board:
                     board.remove(skipped)
                 eval, _ = board.minmax(opposite, board.get_longest_move(opposite), depth - 1, heuristic)
                 if turn == WHITE:
-                    if eval > best_val:
-                        best_val = eval
-                        best_move = (piece, move, skipped)
-                    return best_val, best_move
+                    if eval >= best_val:
+                        if not best_move or (best_move and random() < 0.5):
+                            best_val = eval
+                            best_move = (piece, move, skipped)
                 else:
-                    if eval < best_val:
-                        best_val = eval
-                        best_move = (piece, move, skipped)
-                    return best_val, best_move
+                    if eval <= best_val:
+                        if not best_move or (best_move and random() < 0.5):
+                            best_val = eval
+                            best_move = (piece, move, skipped)
+        return best_val, best_move
+
+    def alfa_beta(self, turn, move_length, depth, alpha, beta, heuristic='1'):
+        opposite = RED if turn == WHITE else WHITE
+        best_val = -math.inf if turn == WHITE else math.inf
+        best_move = None
+
+        if depth == 0 or self.winner(turn):
+            match heuristic:
+                case 1:
+                    return self.validate_one(turn), None
+                case 2:
+                    return self.validate_two(turn), None
+            return None, None
+
+        for piece in self.get_pieces(turn):
+            l_moves = self.get_valid_moves(piece, move_length)
+
+            for move, skipped in l_moves.items():
+                board = deepcopy(self)
+                board.move(piece, move[0], move[1])
+                if skipped:
+                    board.remove(skipped)
+                eval, _ = board.alfa_beta(opposite, board.get_longest_move(opposite), depth - 1, alpha, beta, heuristic)
+
+                if turn == WHITE:
+                    if eval >= best_val:
+                        if not best_move or (best_move and random() < 0.5):
+                            best_val = eval
+                            best_move = (piece, move, skipped)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+                else:
+                    if eval <= best_val:
+                        if not best_move or (best_move and random() < 0.5):
+                            best_val = eval
+                            best_move = (piece, move, skipped)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+        return best_val, best_move
