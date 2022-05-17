@@ -54,7 +54,6 @@ GREY = (128, 128, 128)
 # fonts
 pygame.font.init()
 NUMBER_FONT = pygame.font.SysFont('Times New Roman', 24)
-VALUATION_FONT = pygame.font.SysFont('Times New Roman', 40)
 NOTATION_FONT = pygame.font.SysFont('Times New Roman', 16)
 
 DRAW = 'draw'
