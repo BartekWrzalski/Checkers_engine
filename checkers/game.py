@@ -27,6 +27,7 @@ class Game:
         self.valid_moves = {}
         self.move_length = 0
         self.moves_to_draw = 15
+        self.moves_number = 1
 
     def _playmode(self):
         match self.mode:
@@ -77,9 +78,13 @@ class Game:
     def winner(self):
         if self.moves_to_draw == 0:
             print(DRAW)
+            return True
         winner = self.board.winner(self.turn)
         if winner:
-            print(winner)
+            if winner == WHITE:
+                print(f'WHITE won in {self.moves_number} moves')
+            else:
+                print(f'RED won in {self.moves_number} moves')
             return True
         return False
 
@@ -134,13 +139,13 @@ class Game:
         else:
             self.moves_to_draw = 15
         self.board.update_notation(f'{st} {com} {en}')
-        time.sleep(0.05)
         self.change_turn()
 
     def change_turn(self):
         self.valid_moves = {}
         self.update()
         if self.turn == RED:
+            self.moves_number += 1
             self.turn = WHITE
             self.move_length = self.board.get_longest_move(WHITE)
         else:
