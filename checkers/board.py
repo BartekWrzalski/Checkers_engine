@@ -387,7 +387,7 @@ class Board:
                             best_move = (piece, move, skipped)
         return best_val, best_move
 
-    def alfa_beta(self, turn, move_length, depth, alpha, beta, heuristic='1'):
+    def alpha_beta(self, turn, move_length, depth, alpha, beta, heuristic='1'):
         opposite = RED if turn == WHITE else WHITE
         best_val = -math.inf if turn == WHITE else math.inf
         best_move = None
@@ -408,7 +408,7 @@ class Board:
                 board.move(piece, move[0], move[1])
                 if skipped:
                     board.remove(skipped)
-                eval, _ = board.alfa_beta(opposite, board.get_longest_move(opposite), depth - 1, alpha, beta, heuristic)
+                eval, _ = board.alpha_beta(opposite, board.get_longest_move(opposite), depth - 1, alpha, beta, heuristic)
 
                 if turn == WHITE:
                     if eval > best_val:

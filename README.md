@@ -9,8 +9,6 @@ There is 2 heuristics to valuate the position, both static (for now). You can lo
 
 There is 3 way to play, player vs player, AI vs AI and player vs AI.
 
-Both `min-max` and `alfa-beta` algorithms are implemented. 
-
 When starting game you can provide 
-`depth` (default `3`), `algorithm` (default `'min-max'`), `heuristic` (way of evaluation; default `1`) and 
+`depth` (default `3`), `algorithm` (default `'alpha-beta'`), `heuristic` (way of evaluation; default `1`) and 
 player `color` (if playing against AI; default `WHITE`)

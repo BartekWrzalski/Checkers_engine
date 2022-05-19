@@ -22,7 +22,7 @@ def main():
 
     for i in range(GAMES):
         run = True
-        game.start_game(2, 4, 'alfa-beta', RED)
+        game.start_game(2, 4, 'alpha-beta', RED)
 
         while run:
             clock.tick(FPS)

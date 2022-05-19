@@ -11,7 +11,7 @@ class Game:
         self.win = win
         self.mode = mode
 
-    def start_game(self, heuristic=1, depth=3, algorithm='min-max', player_color=WHITE):
+    def start_game(self, heuristic=1, depth=3, algorithm='alpha-beta', player_color=WHITE):
         self._init()
         self.heur_num = heuristic
         self.depth = depth
@@ -48,8 +48,8 @@ class Game:
                                                                       self.board.get_longest_move(self.turn),
                                                                       self.depth,
                                                                       self.heur_num)
-            case 'alfa-beta':
-                _, (self.selected, move, to_skip) = self.board.alfa_beta(self.turn,
+            case 'alpha-beta':
+                _, (self.selected, move, to_skip) = self.board.alpha_beta(self.turn,
                                                                          self.board.get_longest_move(self.turn),
                                                                          self.depth,
                                                                          -math.inf,
