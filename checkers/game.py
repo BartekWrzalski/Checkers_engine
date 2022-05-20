@@ -77,7 +77,7 @@ class Game:
 
     def winner(self):
         if self.moves_to_draw == 0:
-            print(DRAW)
+            print(f'{DRAW} in {self.moves_number} moves')
             return True
         winner = self.board.winner(self.turn)
         if winner:

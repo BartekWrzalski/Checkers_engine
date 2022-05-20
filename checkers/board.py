@@ -320,21 +320,27 @@ class Board:
             self.can_move = False
         return longest
 
-    def validate_one(self, turn):
-        evaluation = 0.1 if turn == WHITE else -0.1
+    def three_stage_function(self):
+        if self.red_left + self.white_left > 19:
+            EVALUATION_POINTS = OPENING_VALUES
+        elif self.red_left + self.white_left > 8:
+            EVALUATION_POINTS = MID_GAME_VALUES
+        else:
+            EVALUATION_POINTS = ENDGAME_VALUES
 
+        evaluation = 0
         for i, row in enumerate(self.board):
             for j, piece in enumerate(row):
                 if piece != 0:
                     is_white = piece.color == WHITE
                     if not piece.king:
-                        evaluation += PAWN_VALUES_ONE[i] if is_white else -PAWN_VALUES_ONE[-i - 1]
+                        evaluation += EVALUATION_POINTS[i][j] if is_white else -EVALUATION_POINTS[-i - 1][-j - 1]
                     else:
                         evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
         return round(evaluation, 2)
 
-    def validate_two(self, turn):
-        evaluation = 0.1 if turn == WHITE else -0.1
+    def edge_function(self):
+        evaluation = 0
 
         for i, row in enumerate(self.board):
             for j, piece in enumerate(row):
@@ -342,7 +348,7 @@ class Board:
                     continue
                 is_white = piece.color == WHITE
                 if not piece.king:
-                    evaluation += PAWN_VALUES_TWO[i][j] if is_white else -PAWN_VALUES_TWO[-i - 1][-j - 1]
+                    evaluation += EDGE_VALUES[i][j] if is_white else -EDGE_VALUES[-i - 1][-j - 1]
                 else:
                     evaluation += KING_VALUES[i][j] if is_white else -KING_VALUES[-i - 1][-j - 1]
         return round(evaluation, 2)
@@ -355,9 +361,9 @@ class Board:
         if depth == 0 or self.winner(turn):
             match heuristic:
                 case 1:
-                    return self.validate_one(turn), None
+                    return self.three_stage_function(), None
                 case 2:
-                    return self.validate_two(turn), None
+                    return self.edge_function(), None
             return None, None
 
         for piece in self.get_pieces(turn):
@@ -395,9 +401,9 @@ class Board:
         if depth == 0 or self.winner(turn):
             match heuristic:
                 case 1:
-                    return self.validate_one(turn), None
+                    return self.three_stage_function(), None
                 case 2:
-                    return self.validate_two(turn), None
+                    return self.edge_function(), None
             return None, None
 
         for piece in self.get_pieces(turn):

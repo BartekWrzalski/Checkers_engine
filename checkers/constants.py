@@ -17,12 +17,9 @@ FIELD_NUMBERS = [
     [29, None,  30, None,   31, None,   32, None]
 ]
 
-# first validation - row values
-PAWN_VALUES_ONE = [3, 1.8, 1.6, 1.4, 1.4, 1.4, 1.2, 1]
-
-# second validation
-PAWN_VALUES_TWO = [
-    [None, 3,       None, 3.5,      None, 3,        None, 3],
+# edge validation
+EDGE_VALUES = [
+    [None, 3,       None, 3,        None, 3,        None, 3],
     [1, None,       2, None,        2, None,        2, None],
     [None, 2,       None, 3,        None, 3,        None, 1],
     [1, None,       3, None,        3, None,        2, None],
@@ -30,6 +27,31 @@ PAWN_VALUES_TWO = [
     [1, None,       3, None,        3, None,        2, None],
     [None, 2,       None, 2,        None, 2,        None, 1],
     [1, None,       1, None,        1, None,        1, None],
+]
+
+# 3-way validation
+OPENING_VALUES = EDGE_VALUES
+
+MID_GAME_VALUES = [
+    [None, 4,       None, 4,        None, 4,        None, 4],
+    [1.5, None,     1.8, None,      1.8, None,      1.75, None],
+    [None, 1.65,    None, 1.7,      None, 1.7,      None, 1.3],
+    [1.1, None,     1.55, None,     1.55, None,     1.5, None],
+    [None, 1.35,    None, 1.45,     None, 1.45,     None, 1],
+    [0.7, None,     1.2, None,      1.2, None,      1.1, None],
+    [None, 0.9,     None, 0.9,      None, 0.9,      None, 0.7],
+    [0.5, None,     0.5, None,      0.5, None,      0.5, None],
+]
+
+ENDGAME_VALUES = [
+    [None, 4,       None, 4,        None, 4,        None, 4],
+    [2.6, None,     3, None,        3, None,        2.8, None],
+    [None, 1.65,    None, 2,        None, 2,        None, 1.8],
+    [1.3, None,     1.45, None,     1.45, None,     1.3, None],
+    [None, 0.8,     None, 0.9,      None, 0.9,      None, 0.75],
+    [0.35, None,    0.45, None,     0.45, None,     0.45, None],
+    [None, 0.2,     None, 0.2,      None, 0.2,      None, 0.15],
+    [0.1, None,     0.1, None,      0.1, None,      0.1, None]
 ]
 
 # king validation

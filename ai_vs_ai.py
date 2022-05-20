@@ -14,7 +14,7 @@ pygame.display.set_caption('Checkers')
 def main():
     game = Game(WIN, mode='ivi')
 
-    game.start_game(2, 4, 'alfa-beta')
+    game.start_game(2, 4, 'min-max')
     pygame.quit()
 
 
