@@ -1,6 +1,6 @@
 import math
 from random import random
-import pygame
+import pickle
 from .constants import *
 from .piece import Piece
 from copy import deepcopy
@@ -364,7 +364,7 @@ class Board:
             l_moves = self.get_valid_moves(piece, move_length)
 
             for move, skipped in l_moves.items():
-                board = deepcopy(self)
+                board = pickle.loads(pickle.dumps(self))
                 board.move(piece, move[0], move[1])
                 if skipped:
                     board.remove(skipped)
@@ -404,7 +404,7 @@ class Board:
             l_moves = self.get_valid_moves(piece, move_length)
 
             for move, skipped in l_moves.items():
-                board = deepcopy(self)
+                board = pickle.loads(pickle.dumps(self))
                 board.move(piece, move[0], move[1])
                 if skipped:
                     board.remove(skipped)
